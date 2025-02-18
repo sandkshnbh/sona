@@ -104,11 +104,12 @@
       font-size: 48px;
       color: #e91e63;
     }
-    /* قسم المشاعر */
+    /* أقسام المحتوى العامة */
     .content {
       background: rgba(255, 255, 255, 0.95);
       padding: 80px 20px;
       text-align: center;
+      margin-top: 40px;
     }
     .content h2 {
       font-size: 40px;
@@ -121,7 +122,6 @@
       margin: 0 auto 20px;
       line-height: 1.6;
     }
-    /* زر الدعوة للعمل */
     .cta {
       margin-top: 40px;
     }
@@ -139,7 +139,45 @@
       background-color: #d81b60;
       transform: scale(1.05);
     }
-    /* تذييل الصفحة */
+    /* قسم اللعبة */
+    #game {
+      padding: 60px 20px;
+    }
+    #game button {
+      background-color: #e91e63;
+      border: none;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #game button:hover {
+      background-color: #d81b60;
+    }
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .heart {
+      position: absolute;
+      font-size: 40px;
+      color: #e91e63;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s;
+    }
+    .heart:hover {
+      transform: scale(1.2);
+    }
+    /* التذييل */
     footer {
       background: rgba(255, 255, 255, 0.9);
       text-align: center;
@@ -171,6 +209,7 @@
       <li><a href="#hero">الرئيسية</a></li>
       <li><a href="#content">مشاعري</a></li>
       <li><a href="#contact">تواصل</a></li>
+      <li><a href="#game">اللعبة</a></li>
     </ul>
   </nav>
 
@@ -227,6 +266,24 @@
     </div>
   </section>
 
+  <!-- قسم اللعبة -->
+  <section class="content" id="game">
+    <h2 data-aos="fade-up" data-aos-duration="1000">اللعبة البسيطة</h2>
+    <p data-aos="fade-up" data-aos-duration="1200">
+      اضغط على القلوب الظاهرة لتحصل على نقاط. كلما ضغطت أكثر، زادت نقاطك!
+    </p>
+    <div style="margin: 20px 0;" data-aos="fade-up" data-aos-duration="1200">
+      <button id="startGameButton">ابدأ اللعبة</button>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 20px;" data-aos="fade-up" data-aos-duration="1200">
+      <div>النقاط: <span id="scoreDisplay">0</span></div>
+      <div>الوقت: <span id="timerDisplay">30</span> ثانية</div>
+    </div>
+    <div id="gameArea" data-aos="zoom-in" data-aos-duration="1000">
+      <!-- القلوب ستظهر هنا -->
+    </div>
+  </section>
+
   <!-- تذييل الصفحة -->
   <footer data-aos="fade-up" data-aos-duration="1000">
     &copy; 2025 ماما سونا. جميع الحقوق محفوظة.
@@ -239,5 +296,68 @@
       once: true
     });
   </script>
+
+  <!-- سكربت اللعبة -->
+  <script>
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval, heartSpawnInterval;
+    const startGameButton = document.getElementById("startGameButton");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const gameArea = document.getElementById("gameArea");
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      scoreDisplay.textContent = score;
+      timerDisplay.textContent = timeLeft;
+      gameArea.innerHTML = ""; // تفريغ منطقة اللعبة
+      // بدء عد تنازلي للوقت
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+      // بدء ظهور القلوب كل ثانية
+      heartSpawnInterval = setInterval(spawnHeart, 1000);
+    }
+
+    function spawnHeart() {
+      const heart = document.createElement("span");
+      heart.classList.add("heart");
+      heart.innerHTML = '<span class="material-icons">favorite</span>';
+      // تعيين موقع عشوائي داخل منطقة اللعبة
+      const areaWidth = gameArea.clientWidth - 50;
+      const areaHeight = gameArea.clientHeight - 50;
+      const randomX = Math.random() * areaWidth;
+      const randomY = Math.random() * areaHeight;
+      heart.style.left = randomX + "px";
+      heart.style.top = randomY + "px";
+      gameArea.appendChild(heart);
+      // إزالة القلب بعد 1.5 ثانية إذا لم يُضغط عليه
+      setTimeout(() => {
+        if (gameArea.contains(heart)) {
+          gameArea.removeChild(heart);
+        }
+      }, 1500);
+      // عند الضغط على القلب، زيادة النقاط وإزالته
+      heart.addEventListener("click", () => {
+        score++;
+        scoreDisplay.textContent = score;
+        heart.remove();
+      });
+    }
+
+    function endGame() {
+      clearInterval(gameInterval);
+      clearInterval(heartSpawnInterval);
+      alert("انتهت اللعبة! نتيجتك: " + score);
+    }
+
+    startGameButton.addEventListener("click", startGame);
+  </script>
 </body>
-</html> 
+</html>
